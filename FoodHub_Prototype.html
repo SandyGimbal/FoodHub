@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodHub Prototype</title>
+    <style>
+        :root {
+            --primary: #FF5A5F;
+            --primary-light: #FF8A8E;
+            --secondary: #00A699;
+            --dark: #222222;
+            --gray: #717171;
+            --light-gray: #EBEBEB;
+            --bg: #F7F7F7;
+            --white: #FFFFFF;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .phone-container {
+            width: 375px;
+            height: 812px;
+            background-color: var(--white);
+            border-radius: 40px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border: 8px solid #000;
+        }
+
+        .screen {
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            background-color: var(--bg);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .screen.active {
+            display: flex;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Reusable UI Components */
+        .header-top {
+            padding: 40px 20px 20px 20px;
+            background-color: var(--white);
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .btn-back {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--dark);
+            margin-right: 15px;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:active {
+            background-color: var(--primary-light);
+        }
+
+        .btn-secondary {
+            background-color: var(--white);
+            color: var(--dark);
+            border: 1px solid var(--light-gray);
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* --- Screen 1: Login --- */
+        #login-screen {
+            background-color: var(--white);
+            padding: 40px 20px;
+            justify-content: center;
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .logo-text {
+            font-size: 42px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -1px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            font-size: 16px;
+            background-color: var(--bg);
+        }
+        
+        .login-divider {
+            text-align: center;
+            margin: 30px 0;
+            color: var(--gray);
+            font-size: 14px;
+            position: relative;
+        }
+        
+        .login-divider::before, .login-divider::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background-color: var(--light-gray);
+        }
+        .login-divider::before { left: 0; }
+        .login-divider::after { right: 0; }
+
+
+        /* --- Screen 2: Dashboard --- */
+        #dashboard-screen {
+            padding-bottom: 80px; /* space for bottom nav */
+        }
+        
+        .dash-header {
+            background-color: var(--primary);
+            padding: 50px 20px 20px 20px;
+            color: var(--white);
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+        }
+
+        .address-box {
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .address-box strong {
+            font-size: 16px;
+            display: block;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 20px;
+            border: none;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 20px;
+            color: var(--dark);
+        }
+
+        .banner-carousel {
+            display: flex;
+            overflow-x: auto;
+            padding: 0 20px;
+            gap: 15px;
+            scrollbar-width: none;
+        }
+
+        .banner {
+            min-width: 280px;
+            height: 140px;
+            background: linear-gradient(135deg, #FF5A5F, #FF8A8E);
+            border-radius: 16px;
+            padding: 20px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(255,90,95,0.3);
+        }
+        
+        .banner h3 { font-size: 22px; margin-bottom: 5px; }
+        .banner p { font-size: 14px; opacity: 0.9; }
+
+        .categories {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            margin-top: 20px;
+        }
+
+        .category-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-icon {
+            width: 50px;
+            height: 50px;
+            background-color: var(--white);
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .category-name {
+            font-size: 12px;
+            color: var(--dark);
+            font-weight: 500;
+        }
+
+        .restaurant-list {
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .resto-card {
+            background-color: var(--white);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            cursor: pointer;
+        }
+
+        .resto-img {
+            width: 100%;
+            height: 120px;
+            background-color: #ddd;
+            background-image: url('https://images.unsplash.com/photo-1550547660-d9450f859349?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .resto-info {
+            padding: 15px;
+        }
+
+        .resto-name {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .resto-meta {
+            font-size: 12px;
+            color: var(--gray);
+            display: flex;
+            gap: 15px;
+        }
+
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 70px;
+            background-color: var(--white);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid var(--light-gray);
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--gray);
+            font-size: 11px;
+            gap: 4px;
+            cursor: pointer;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon { font-size: 20px; }
+
+
+        /* --- Screen 3: Restaurant Detail --- */
+        #resto-screen .resto-hero {
+            height: 200px;
+            background-image: url('https://images.unsplash.com/photo-1550547660-d9450f859349?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .resto-hero-nav {
+            position: absolute;
+            top: 40px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .hero-btn {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255,255,255,0.9);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .resto-detail-info {
+            background-color: var(--white);
+            padding: 20px;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            margin-top: -20px;
+            position: relative;
+        }
+
+        .resto-detail-name { font-size: 22px; font-weight: 800; margin-bottom: 10px; }
+        
+        .filter-tabs {
+            display: flex;
+            padding: 15px 20px;
+            gap: 10px;
+            overflow-x: auto;
+            background-color: var(--bg);
+            scrollbar-width: none;
+        }
+
+        .tab {
+            padding: 8px 16px;
+            background-color: var(--white);
+            border: 1px solid var(--light-gray);
+            border-radius: 20px;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        
+        .tab.active {
+            background-color: var(--dark);
+            color: var(--white);
+            border-color: var(--dark);
+        }
+
+        .menu-list {
+            padding: 0 20px 100px 20px;
+            background-color: var(--bg);
+        }
+
+        .menu-item {
+            display: flex;
+            padding: 15px;
+            background-color: var(--white);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .menu-item-info { flex: 1; padding-right: 10px; }
+        .menu-item-name { font-weight: 600; font-size: 15px; margin-bottom: 5px; }
+        .menu-item-desc { font-size: 12px; color: var(--gray); margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .menu-item-price { font-weight: 700; color: var(--dark); }
+        
+        .menu-item-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            background-color: #ddd;
+            background-image: url('https://images.unsplash.com/photo-1512152272829-e3139592d56f?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80');
+            background-size: cover;
+            position: relative;
+        }
+
+        .btn-add {
+            position: absolute;
+            bottom: -10px;
+            right: 10px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .floating-cart {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background-color: var(--primary);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(255,90,95,0.4);
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        .cart-info { font-weight: 600; }
+        .cart-action { font-weight: 700; }
+
+
+        /* --- Screen 4: Checkout --- */
+        #checkout-screen {
+            background-color: var(--bg);
+            padding-bottom: 100px;
+        }
+
+        .checkout-section {
+            background-color: var(--white);
+            padding: 20px;
+            margin-bottom: 10px;
+        }
+
+        .section-header {
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .text-btn { color: var(--primary); font-size: 13px; font-weight: 600; cursor: pointer; }
+
+        .address-detail { font-size: 14px; color: var(--dark); line-height: 1.5; margin-bottom: 15px; }
+        .notes-input { width: 100%; padding: 10px; border: 1px solid var(--light-gray); border-radius: 8px; font-size: 13px; }
+
+        .order-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .order-qty { font-weight: 600; width: 25px; }
+        .order-name { flex: 1; font-size: 14px; }
+        .order-price { font-weight: 600; font-size: 14px; }
+
+        .payment-method { display: flex; align-items: center; gap: 15px; border: 1px solid var(--light-gray); padding: 15px; border-radius: 12px; margin-bottom: 10px; }
+        .payment-icon { width: 30px; height: 30px; background-color: var(--bg); border-radius: 6px; display: flex; justify-content: center; align-items: center; font-weight: bold; color: var(--primary); }
+        .payment-name { flex: 1; font-weight: 600; font-size: 14px; }
+        
+        .promo-btn { display: flex; justify-content: space-between; padding: 15px; border: 1px solid var(--secondary); border-radius: 12px; color: var(--secondary); font-weight: 600; cursor: pointer; background-color: rgba(0,166,153,0.05); }
+
+        .bill-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; color: var(--gray); }
+        .bill-total { display: flex; justify-content: space-between; margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--light-gray); font-weight: 800; font-size: 16px; color: var(--dark); }
+        
+        .discount-text { color: var(--secondary); }
+
+        .sticky-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background-color: var(--white);
+            border-top: 1px solid var(--light-gray);
+            z-index: 100;
+        }
+
+
+        /* --- Screen 5: Tracking --- */
+        #tracking-screen {
+            background-color: var(--bg);
+        }
+
+        .map-area {
+            height: 350px;
+            background-color: #E5E3DF;
+            position: relative;
+            overflow: hidden;
+            background-image: url('https://media.wired.com/photos/59269cd37034dc5f91bec0f1/master/w_2560%2Cc_limit/GoogleMapTA.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .map-pin {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 40px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0) translate(-50%, -50%);}
+            40% {transform: translateY(-20px) translate(-50%, -50%);}
+            60% {transform: translateY(-10px) translate(-50%, -50%);}
+        }
+
+        .tracking-card {
+            background-color: var(--white);
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            padding: 25px 20px;
+            margin-top: -30px;
+            position: relative;
+            z-index: 10;
+            min-height: 400px;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+        }
+
+        .eta-title { color: var(--gray); font-size: 14px; text-align: center; margin-bottom: 5px; }
+        .eta-time { font-size: 28px; font-weight: 800; color: var(--dark); text-align: center; margin-bottom: 25px; }
+
+        .progress-bar { display: flex; justify-content: space-between; position: relative; margin-bottom: 30px; padding: 0 10px; }
+        .progress-line { position: absolute; top: 15px; left: 20px; right: 20px; height: 3px; background-color: var(--light-gray); z-index: 1; }
+        .progress-line-active { position: absolute; top: 15px; left: 20px; width: 66%; height: 3px; background-color: var(--primary); z-index: 2; transition: width 1s; }
+        
+        .step { position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .step-dot { width: 32px; height: 32px; background-color: var(--light-gray); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: var(--gray); font-size: 14px; border: 3px solid var(--white); }
+        .step.active .step-dot { background-color: var(--primary); color: white; }
+        .step-label { font-size: 11px; color: var(--gray); text-align: center; width: 60px; line-height: 1.2; }
+        .step.active .step-label { color: var(--dark); font-weight: 600; }
+
+        .driver-info { display: flex; align-items: center; padding: 15px; border: 1px solid var(--light-gray); border-radius: 16px; margin-bottom: 20px; }
+        .driver-img { width: 50px; height: 50px; border-radius: 50%; background-color: #ddd; margin-right: 15px; background-image: url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80'); background-size: cover; }
+        .driver-details { flex: 1; }
+        .driver-name { font-weight: 700; font-size: 15px; margin-bottom: 3px; }
+        .driver-plate { font-size: 13px; color: var(--gray); }
+        .driver-actions { display: flex; gap: 10px; }
+        .driver-btn { width: 40px; height: 40px; border-radius: 50%; background-color: var(--bg); display: flex; justify-content: center; align-items: center; border: none; font-size: 18px; color: var(--primary); cursor: pointer; }
+
+    </style>
+</head>
+<body>
+
+    <div class="phone-container">
+        
+        <!-- Screen 1: Login -->
+        <div id="login-screen" class="screen active">
+            <div class="logo-container">
+                <div class="logo-text">FoodHub</div>
+                <p style="color: var(--gray); margin-top: 10px;">Pesan Makanan Tanpa Ribet</p>
+            </div>
+            
+            <div class="form-group">
+                <input type="text" class="form-input" placeholder="Email atau Nomor HP">
+            </div>
+            <div class="form-group">
+                <input type="password" class="form-input" placeholder="Password">
+            </div>
+            
+            <button class="btn-primary" onclick="navTo('dashboard-screen')">Masuk</button>
+            
+            <div class="login-divider">atau masuk dengan</div>
+            
+            <button class="btn-secondary" onclick="navTo('dashboard-screen')">
+                <span style="font-size: 20px;">G</span> Login with Google
+            </button>
+            <button class="btn-secondary" onclick="navTo('dashboard-screen')">
+                <span style="font-size: 20px;">🍏</span> Login with Apple
+            </button>
+        </div>
+
+        <!-- Screen 2: Dashboard -->
+        <div id="dashboard-screen" class="screen">
+            <div class="dash-header">
+                <div class="address-box">
+                    Kirim ke:
+                    <strong>📍 Jl. Kos Mahasiswa No. 12 ▾</strong>
+                </div>
+                <input type="text" class="search-bar" placeholder="🔍 Mau makan apa hari ini?">
+            </div>
+
+            <div class="categories">
+                <div class="category-item">
+                    <div class="category-icon">🛵</div>
+                    <div class="category-name">Terdekat</div>
+                </div>
+                <div class="category-item">
+                    <div class="category-icon">🔥</div>
+                    <div class="category-name">Terlaris</div>
+                </div>
+                <div class="category-item" onclick="navTo('resto-screen')">
+                    <div class="category-icon" style="background-color: var(--primary-light); color: white;">%</div>
+                    <div class="category-name">Promo</div>
+                </div>
+                <div class="category-item">
+                    <div class="category-icon">🌙</div>
+                    <div class="category-name">Buka 24 Jam</div>
+                </div>
+            </div>
+
+            <div class="section-title" style="margin-top: 30px;">Promo Hari Ini</div>
+            <div class="banner-carousel">
+                <div class="banner">
+                    <h3>Diskon 50%</h3>
+                    <p>Khusus Pengguna Baru</p>
+                </div>
+                <div class="banner" style="background: linear-gradient(135deg, #00A699, #00D2C2);">
+                    <h3>Gratis Ongkir</h3>
+                    <p>Belanja minimal Rp 20.000</p>
+                </div>
+            </div>
+
+            <div class="section-title">Rekomendasi Restoran</div>
+            <div class="restaurant-list">
+                <div class="resto-card" onclick="navTo('resto-screen')">
+                    <div class="resto-img"></div>
+                    <div class="resto-info">
+                        <div class="resto-name">Nasi Goreng Gila 24 Jam</div>
+                        <div class="resto-meta">
+                            <span>⭐ 4.8</span>
+                            <span>• 15-20 mnt</span>
+                            <span>• 2 km</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="resto-card" onclick="navTo('resto-screen')">
+                    <div class="resto-img" style="background-image: url('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80')"></div>
+                    <div class="resto-info">
+                        <div class="resto-name">Burger Banget - Setiabudi</div>
+                        <div class="resto-meta">
+                            <span>⭐ 4.6</span>
+                            <span>• 25-30 mnt</span>
+                            <span>• 4.5 km</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-nav">
+                <div class="nav-item active">
+                    <div class="nav-icon">🏠</div>
+                    <span>Beranda</span>
+                </div>
+                <div class="nav-item">
+                    <div class="nav-icon">%</div>
+                    <span>Promo</span>
+                </div>
+                <div class="nav-item">
+                    <div class="nav-icon">🛒</div>
+                    <span>Keranjang</span>
+                </div>
+                <div class="nav-item">
+                    <div class="nav-icon">📄</div>
+                    <span>Riwayat</span>
+                </div>
+                <div class="nav-item">
+                    <div class="nav-icon">👤</div>
+                    <span>Profil</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 3: Resto Detail -->
+        <div id="resto-screen" class="screen">
+            <div class="resto-hero">
+                <div class="resto-hero-nav">
+                    <button class="hero-btn" onclick="navTo('dashboard-screen')">←</button>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="hero-btn">↗</button>
+                        <button class="hero-btn">♡</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="resto-detail-info">
+                <div class="resto-detail-name">Nasi Goreng Gila 24 Jam</div>
+                <div class="resto-meta" style="margin-bottom: 10px;">
+                    <span>⭐ 4.8 (2rb+ rating)</span>
+                    <span>• 2 km</span>
+                    <span style="color: var(--secondary); font-weight: 600;">• Buka</span>
+                </div>
+                <p style="font-size: 13px; color: var(--gray);">Aneka nasi goreng, mie goreng, dan kwetiau.</p>
+            </div>
+
+            <div class="filter-tabs">
+                <div class="tab active">Semua</div>
+                <div class="tab">Promo Bundling</div>
+                <div class="tab">Makanan Utama</div>
+                <div class="tab">Minuman</div>
+            </div>
+
+            <div class="menu-list">
+                <div class="section-title" style="margin: 20px 0 15px 0;">Menu Terlaris</div>
+                
+                <div class="menu-item">
+                    <div class="menu-item-info">
+                        <div class="menu-item-name">Nasi Goreng Spesial (Telur + Sosis)</div>
+                        <div class="menu-item-desc">Nasi goreng khas bumbu rempah dengan topping telur mata sapi dan sosis ayam.</div>
+                        <div class="menu-item-price">Rp 25.000</div>
+                    </div>
+                    <div class="menu-item-img">
+                        <button class="btn-add">+ Tambah</button>
+                    </div>
+                </div>
+
+                <div class="menu-item">
+                    <div class="menu-item-info">
+                        <div class="menu-item-name">Es Teh Manis</div>
+                        <div class="menu-item-desc">Es teh manis segar ukuran reguler.</div>
+                        <div class="menu-item-price">Rp 5.000</div>
+                    </div>
+                    <div class="menu-item-img" style="background-image: url('https://images.unsplash.com/photo-1556679343-c7306c1976bc?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80')">
+                        <button class="btn-add">+ Tambah</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="floating-cart" onclick="navTo('checkout-screen')">
+                <div class="cart-info">1 Item | Rp 25.000</div>
+                <div class="cart-action">Checkout ➔</div>
+            </div>
+        </div>
+
+        <!-- Screen 4: Checkout -->
+        <div id="checkout-screen" class="screen">
+            <div class="header-top">
+                <button class="btn-back" onclick="navTo('resto-screen')">←</button>
+                <div class="header-title">Checkout Pesanan</div>
+            </div>
+
+            <div class="checkout-section">
+                <div class="section-header">
+                    <span>Alamat Pengiriman</span>
+                    <span class="text-btn">Ubah Alamat</span>
+                </div>
+                <div class="address-detail">
+                    <strong>Andi (Anak Kos)</strong><br>
+                    Jl. Kos Mahasiswa No. 12, Kamar 4A.<br>
+                    Kec. Setiabudi, Jakarta Selatan.
+                </div>
+                <input type="text" class="notes-input" placeholder="Catatan untuk Driver (Cth: Titip di pos satpam)">
+            </div>
+
+            <div class="checkout-section">
+                <div class="section-header">Ringkasan Pesanan</div>
+                <div class="order-item">
+                    <div class="order-qty">1x</div>
+                    <div class="order-name">Nasi Goreng Spesial</div>
+                    <div class="order-price">Rp 25.000</div>
+                </div>
+                <div class="order-item text-btn" style="font-size: 12px; margin-top: -5px; justify-content: flex-start; gap: 10px;">
+                    <span>Ubah</span>
+                </div>
+            </div>
+
+            <div class="checkout-section">
+                <div class="section-header">Metode Pembayaran</div>
+                <div class="payment-method">
+                    <div class="payment-icon">E</div>
+                    <div class="payment-name">E-Wallet (Saldo: Rp 75.000)</div>
+                    <div>›</div>
+                </div>
+                
+                <div class="promo-btn">
+                    <span>% Promo: Diskon Ongkir 50%</span>
+                    <span>Hapus ✕</span>
+                </div>
+            </div>
+
+            <div class="checkout-section" style="margin-bottom: 20px;">
+                <div class="section-header">Rincian Pembayaran</div>
+                <div class="bill-row"><span>Subtotal Makanan</span><span>Rp 25.000</span></div>
+                <div class="bill-row"><span>Ongkos Kirim</span><span>Rp 10.000</span></div>
+                <div class="bill-row discount-text"><span>Diskon Ongkir</span><span>- Rp 5.000</span></div>
+                <div class="bill-row"><span>Biaya Layanan</span><span>Rp 2.000</span></div>
+                <div class="bill-total"><span>Total Pembayaran</span><span>Rp 32.000</span></div>
+            </div>
+
+            <div class="sticky-bottom">
+                <button class="btn-primary" onclick="navTo('tracking-screen')">Pesan Sekarang - Rp 32.000</button>
+            </div>
+        </div>
+
+        <!-- Screen 5: Tracking -->
+        <div id="tracking-screen" class="screen">
+            <div class="header-top">
+                <button class="btn-back" onclick="navTo('dashboard-screen')">✕</button>
+                <div class="header-title">Pesanan Berlangsung</div>
+            </div>
+
+            <div class="map-area">
+                <div class="map-pin">🛵</div>
+            </div>
+
+            <div class="tracking-card">
+                <div class="eta-title">Estimasi Pesanan Tiba</div>
+                <div class="eta-time">12 Menit</div>
+
+                <div class="progress-bar">
+                    <div class="progress-line"></div>
+                    <div class="progress-line-active"></div>
+                    <div class="step active">
+                        <div class="step-dot">✓</div>
+                        <div class="step-label">Dikonfirmasi</div>
+                    </div>
+                    <div class="step active">
+                        <div class="step-dot">🍳</div>
+                        <div class="step-label">Dimasak</div>
+                    </div>
+                    <div class="step active">
+                        <div class="step-dot">🛵</div>
+                        <div class="step-label">Diantar</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-dot">4</div>
+                        <div class="step-label">Selesai</div>
+                    </div>
+                </div>
+
+                <div class="driver-info">
+                    <div class="driver-img"></div>
+                    <div class="driver-details">
+                        <div class="driver-name">Budi Santoso</div>
+                        <div class="driver-plate">B 1234 XYZ • Honda Beat</div>
+                    </div>
+                    <div class="driver-actions">
+                        <button class="driver-btn">💬</button>
+                        <button class="driver-btn">📞</button>
+                    </div>
+                </div>
+                
+                <div class="order-item" style="border-top: 1px solid var(--light-gray); padding-top: 20px;">
+                    <div class="order-qty">1x</div>
+                    <div class="order-name">Nasi Goreng Spesial</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function navTo(screenId) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Show target screen
+            document.getElementById(screenId).classList.add('active');
+            
+            // Scroll target to top
+            document.getElementById(screenId).scrollTop = 0;
+        }
+    </script>
+</body>
+</html>
